@@ -1431,8 +1431,13 @@ class webdav_client {
                 // print "--- response header end ---<br>";
             }
             if (!$header_done) {
+                //Fixing field value - if in fieldvalue has http://
+                $lines[$i] = str_replace("http:/", "http+++/", $lines[$i]);
                 // store all found headers in array ...
                 list($fieldname, $fieldvalue) = explode(':', $lines[$i]);
+                //Fixing resulting field value - if in fieldvalue has http://
+                $fieldname = str_replace("http+++/", "http:/", $fieldname);
+                $fieldvalue = str_replace("http+++/", "http:/", $fieldvalue);
                 // check if this header was allready set (apache 2.0 webdav module does this....).
                 // If so we add the the value to the end the fieldvalue, separated by comma...
                 if (!$ret_struct['header'][$fieldname]) {
@@ -1509,7 +1514,53 @@ class webdav_client {
             error_log($err_string);
         }
     }
+
+    /**
+     * Public method filePublish
+     *
+     * Method for the file publishing
+     * @param string path to file
+     * @return mixed If file published correctly than returned string with the 
+     * url to the file. If some errors occured, than method returns false
+     */
+    function filePublish($path) {
+        $this->_path = $this->_translate_uri($path) . "?publish";
+        $this->_header_unset();
+        $this->_create_basic_request('POST');
+        $this->_send_request();
+        $this->_get_respond();
+        $response = $this->_process_respond();
+        // validate the response ...
+        // check http-version
+
+        if ($response['status']['status-code'] == '302') {            
+            return $response['header']['Location'];
+        } else {
+            return FALSE;
+        }
+    }
     
+    /**
+     * Public method fileUnPublish
+     *
+     * Method for the file unpublishing
+     * @param string path to file
+     * @return bool If file unpublished correctly than returned TRUE. If some errors occured, than method returns false
+     */
+    function fileUnPublish($path) {
+        $this->_path = $this->_translate_uri($path) . "?unpublish";
+        $this->_header_unset();
+        $this->_create_basic_request('POST');
+        $this->_send_request();
+        $this->_get_respond();
+        $response = $this->_process_respond();
+
+        if ($response['status']['status-code'] == '200') {            
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
 
 }
 

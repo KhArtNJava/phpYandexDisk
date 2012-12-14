@@ -31,8 +31,18 @@ if (!$wdc->check_webdav()) {
 
 $http_status  = $wdc->mkcol("/backups");
 
-$http_status = $wdc->put_file("/backups/"."test.zip", $backupFileName);
+$http_status = $wdc->put_file("/backups/"."test.zip", "test.zip");
 print 'webdav server returns ' . $http_status;
+
+$urlToThePublishedFile= $wdc->filePublish("/backups/test.zip");
+print 'link to the published file: ' . $urlToThePublishedFile;
+
+$fileUnpublishinStatus= $wdc->fileUnPublish("/backups/test.zip");
+if ($fileUnpublishinStatus) {
+    echo "File UnPublished correctly";
+} else {
+    echo "Some errors occured on file UnPublish";
+}
 
 $wdc->close();
 flush();
