@@ -4,7 +4,7 @@
 error_reporting(0);
 
 if (!class_exists('webdav_client')) {
- require('./class_webdav_client.php');
+ require('class_webdav_client.php');
 } 
 
 $wdc = new webdav_client();
