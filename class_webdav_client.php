@@ -349,9 +349,20 @@ class webdav_client
             {
                 $this->_error_log( 'returning buffer with ' . strlen( $response[ 'body' ] ) . ' bytes.' );
                 $buffer = $response[ 'body' ];
-                if ( strlen( $response[ 'body' ] ) < $response[ 'header' ][ 'Content-Length' ] )
+                
+                
+//                echo "+++!!!!!!!!!!!" . " " . mb_strlen( $response[ 'body' ],
+//                            "windows-1251" ) . "+++" . $response[ 'header' ][ 'Content-Length' ]."\r\n \r\n";
+//                
+//                echo "+++!!!!!!!!!!!" . " " . mb_strlen( $response[ 'body' ],
+//                            "cp1251" ) . "+++" . $response[ 'header' ][ 'Content-Length' ]."\r\n \r\n";
+                
+                if ( mb_strlen( $response[ 'body' ], "cp1251" ) < $response[ 'header' ][ 'Content-Length' ] )
                 {
                     $buffer = null;
+//                    print_r($response[ 'body' ]);
+//                    mb_internal_encoding( "UTF-8" );
+                    
                     return false;
                 }
             }
@@ -467,7 +478,10 @@ class webdav_client
 
         if ( $this->get( $srcpath, $buffer ) )
         {
-            $handle = fopen( $localpath, 'w' );
+//            echo "----------------------" . " " . mb_strlen( $buffer,
+//                    "cp1251" ) ;
+
+            $handle = fopen( $localpath, 'w+' );
             if ( $handle )
             {
                 fwrite( $handle, $buffer );
@@ -1445,7 +1459,8 @@ class webdav_client
                         $this->_protocol ) );
         $this->_header_add( sprintf( 'Host: %s', $this->_server ) );
         // $request .= sprintf('Connection: Keep-Alive');
-        $this->_header_add( sprintf( 'User-Agent: %s', $this->_user_agent ) );
+//        $this->_header_add( sprintf( 'User-Agent: %s', $this->_user_agent ) );
+        $this->_header_add( sprintf( 'Accept: %s', "*/*" ) );
         $this->_header_add( sprintf( 'Authorization: Basic %s',
                         base64_encode( "$this->_user:$this->_pass" ) ) );
 
@@ -1494,7 +1509,7 @@ class webdav_client
         $buffer = '';
         $header = '';
         // attention: do not make max_chunk_size to big....
-        $max_chunk_size = 1000;
+        $max_chunk_size = 5000;
         // be sure we got a open ressource
         if ( !$this->_fp )
         {
@@ -1577,7 +1592,17 @@ class webdav_client
                     fwrite( $this->_fp, "Connection: Close\r\n\r\n" );
                     while ( !feof( $this->_fp ) )
                     {
-                        $buffer .= fread( $this->_fp, $max_chunk_size );
+                        $buffer_tmp = "";
+                        $buffer_tmp = fread( $this->_fp, $max_chunk_size );
+                        if ( strpos( $buffer_tmp, "HTTP/1.1 400 Bad Request" ) === FALSE )
+                        {
+//                            print_r( $buffer_tmp );
+//                            echo "\r\n";
+//                            echo "\r\n";
+                            $buffer .= $buffer_tmp;
+                        } else {
+//                            print_r($buffer_tmp);
+                        }
                     }
 
 //					do {
