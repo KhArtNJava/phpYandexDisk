@@ -1487,6 +1487,11 @@ class webdav_client
         // convert array to string
         $buffer = implode( "\r\n", $this->_req );
         $buffer .= "\r\n\r\n";
+        
+        if ($buffer==null) {
+            $buffer="";
+        }
+        
         $this->_error_log( $buffer );
         fputs( $this->_fp, $buffer );
 
