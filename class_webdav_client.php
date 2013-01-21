@@ -349,6 +349,11 @@ class webdav_client
             {
                 $this->_error_log( 'returning buffer with ' . strlen( $response[ 'body' ] ) . ' bytes.' );
                 $buffer = $response[ 'body' ];
+                if ( strlen( $response[ 'body' ] ) < $response[ 'header' ][ 'Content-Length' ] )
+                {
+                    $buffer = null;
+                    return false;
+                }
             }
             return $response[ 'status' ][ 'status-code' ];
         }
@@ -1489,7 +1494,7 @@ class webdav_client
         $buffer = '';
         $header = '';
         // attention: do not make max_chunk_size to big....
-        $max_chunk_size = 81920;
+        $max_chunk_size = 1000;
         // be sure we got a open ressource
         if ( !$this->_fp )
         {
