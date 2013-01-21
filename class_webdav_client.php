@@ -331,6 +331,12 @@ class webdav_client
      */
     function get( $path, &$buffer )
     {
+
+        // reopen it
+        // be sure to close the open socket.
+        $this->close();
+        $this->_reopen();
+
         $this->_path = $this->_translate_uri( $path );
         $this->_header_unset();
         $this->_create_basic_request( 'GET' );
@@ -338,6 +344,7 @@ class webdav_client
         $this->_get_respond();
         $response = $this->_process_respond();
 
+//        print_r($response);
         // validate the response
         // check http-version
         if ( $response[ 'status' ][ 'http-version' ] == 'HTTP/1.1' ||
@@ -349,20 +356,20 @@ class webdav_client
             {
                 $this->_error_log( 'returning buffer with ' . strlen( $response[ 'body' ] ) . ' bytes.' );
                 $buffer = $response[ 'body' ];
-                
-                
+
+
 //                echo "+++!!!!!!!!!!!" . " " . mb_strlen( $response[ 'body' ],
 //                            "windows-1251" ) . "+++" . $response[ 'header' ][ 'Content-Length' ]."\r\n \r\n";
 //                
 //                echo "+++!!!!!!!!!!!" . " " . mb_strlen( $response[ 'body' ],
 //                            "cp1251" ) . "+++" . $response[ 'header' ][ 'Content-Length' ]."\r\n \r\n";
-                
+
                 if ( mb_strlen( $response[ 'body' ], "cp1251" ) < $response[ 'header' ][ 'Content-Length' ] )
                 {
                     $buffer = null;
 //                    print_r($response[ 'body' ]);
 //                    mb_internal_encoding( "UTF-8" );
-                    
+
                     return false;
                 }
             }
@@ -1486,12 +1493,15 @@ class webdav_client
 
         // convert array to string
         $buffer = implode( "\r\n", $this->_req );
-        $buffer .= "\r\n\r\n";
-        
-        if ($buffer==null) {
-            $buffer="";
+        if ( $buffer == null )
+        {
+            $buffer = "";
         }
         
+        $buffer .= "\r\n\r\n";
+
+        
+
         $this->_error_log( $buffer );
         fputs( $this->_fp, $buffer );
 
@@ -1605,7 +1615,8 @@ class webdav_client
 //                            echo "\r\n";
 //                            echo "\r\n";
                             $buffer .= $buffer_tmp;
-                        } else {
+                        } else
+                        {
 //                            print_r($buffer_tmp);
                         }
                     }
