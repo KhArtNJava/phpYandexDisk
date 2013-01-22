@@ -1,4 +1,4 @@
-<?php
+<?
 
 error_reporting( 0 );
 
@@ -13,8 +13,8 @@ if ( !class_exists( 'webdav_client' ) )
 $wdc = new webdav_client();
 $wdc->set_server( 'ssl://webdav.yandex.ru' );
 $wdc->set_port( 443 );
-$wdc->set_user( 'projectalterpeople' );
-$wdc->set_pass( '457project' );
+$wdc->set_user( 'forpdfsending' );
+$wdc->set_pass( '' );
 // use HTTP/1.1
 $wdc->set_protocol( 1 );
 // enable debugging
